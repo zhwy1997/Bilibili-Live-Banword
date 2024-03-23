@@ -25,7 +25,7 @@ class biliLiveBanword():
         ##如果没有登录
         if (not loginFlag):
             # 创建登录按钮
-            self.login_button = tk.Button(self.root, text="登录", font=("黑体", 12),width=20, height=3,  borderwidth=3, relief="raised",command=self.login_clicked)
+            self.login_button = tk.Button(self.root, text="登录", font=("黑体", 12),width=20, height=3,  borderwidth=3, relief="raised",command=self._login_clicked)
             self.login_button.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
             #login_button.pack(padx=10, pady=10)
             # 创建显示文字的 Label
@@ -112,9 +112,11 @@ class biliLiveBanword():
         scrollbar.grid(row=0, column=3, sticky="ns")
         # 将滚动条与Text控件关联
         self.log_box.config(yscrollcommand=scrollbar.set)
+
+        ##窗口主循环
         self.root.mainloop()
 
-    def login_clicked(self):
+    def _login_clicked(self):
         oauthKey=self.user.qr_scan()
         self.text_label.config(text="请扫码登录")
         ##二维码路径
@@ -169,7 +171,7 @@ class biliLiveBanword():
             self.selectedbox1.delete(idx)
         ##重新获取已选，并生成结果集
         optionList = self.selectedbox2.get(0, tk.END)
-        self._setBoxWordList(self._getWordList())
+        self._set_box_word_list(self._get_word_list())
 
     def cancel_clicked(self):
         selected_indices = self.selectedbox2.curselection()
@@ -181,9 +183,9 @@ class biliLiveBanword():
             #删除已选框中的选项
             self.selectedbox2.delete(idx)
         ##重新获取已选，并生成结果集
-        self._setBoxWordList(self._getWordList())
+        self._set_box_word_list(self._get_word_list())
 
-    ###子窗口
+    ###管理本地清单子窗口
     def manage_clicked(self):
         child_window = tk.Toplevel(self.root)
         child_window.title("本地屏蔽词管理")
@@ -195,7 +197,7 @@ class biliLiveBanword():
         topic_label = tk.Label(child_window, text="主题清单", font=("黑体", 12))
         topic_label.grid(row=1, column=0,sticky="nw",padx=10, pady=0)
         topic_select = tk.Listbox(child_window, selectmode=tk.SINGLE, width=20, height=15,exportselection=False)
-        topic_select.grid(row=1, column=0,sticky="nw",padx=10, pady=20)
+        topic_select.grid(row=1, column=0,sticky="nw",padx=10, pady=25)
         entry_var = tk.StringVar()
         del_topic_button = tk.Button(child_window, text="删除该主题",font=("黑体", 12),width=20, height=1,borderwidth=3,command=lambda: self.del_topic(topic_select,word_select))
         del_topic_button.grid(row=1, column=0,padx=10,pady=(250,0))
@@ -209,8 +211,8 @@ class biliLiveBanword():
         ##该主题的屏蔽词清单
         word_label = tk.Label(child_window, text="屏蔽词列表", font=("黑体", 12))
         word_label.grid(row=1, column=1,sticky='nw',padx=10, pady=0)
-        word_select= tk.Listbox(child_window, selectmode=tk.MULTIPLE, width=20, height=15)
-        word_select.grid(row=1, column=1,sticky="nw",padx=10, pady=20)
+        #word_select= tk.Listbox(child_window, selectmode=tk.MULTIPLE, width=20, height=15)
+        #word_select.grid(row=1, column=1,sticky="nw",padx=10, pady=20)
         del_word_button = tk.Button(child_window, text="删除该屏蔽词",font=("黑体", 12),width=20, height=1,borderwidth=3, command=lambda: self.del_word(topic_select,word_select) )
         del_word_button.grid(row=1, column=1,padx=10,pady=(250,0))
         entry_var_word = tk.StringVar()
@@ -218,6 +220,24 @@ class biliLiveBanword():
         entry_word.grid(row=1, column=1,sticky="nw",padx=10, pady=(345,0))
         add_word_button = tk.Button(child_window, text="添加",font=("黑体", 12),width=10, height=1,borderwidth=2, command=lambda: self.add_word(entry_word,topic_select,word_select))
         add_word_button.grid(row=1, column=1,padx=10,pady=(370,0))
+
+        ##贴着清单的滚动条
+
+        sub_frame = tk.Frame(child_window)
+        sub_frame.grid(row=1, column=1,padx=(0,0), pady=(20,10),sticky="nw")  # 设置容器填充满父容器
+
+        word_select= tk.Listbox(sub_frame, selectmode=tk.MULTIPLE, width=20, height=15)
+        word_select.grid(row=1, column=1,sticky="nw", pady=5)
+        scrollbar1 = Scrollbar(sub_frame, command=word_select.yview)
+        scrollbar1.grid(row=1, column=2, sticky="ns")
+        # # 将滚动条与Text控件关联
+        word_select.config(yscrollcommand=scrollbar1.set)
+        # word_label = tk.Label(child_window, text="屏蔽词列表", font=("黑体", 12))
+        # word_label.grid(row=1, column=1,sticky='nw',padx=10, pady=0)
+
+
+
+
         ##绑定选择事件
         topic_select.bind("<<ListboxSelect>>", lambda event: self.show_word_select_manage(self.wordjson,topic_select,word_select))
         entry_word.bind("<Return>", lambda event: self.add_word(entry_word,topic_select,word_select))
@@ -226,6 +246,9 @@ class biliLiveBanword():
         save_button = tk.Button(child_window, text="保存当前列表到本地",font=("黑体", 12),width=20, height=1,borderwidth=2, fg="pink",command=self.save_word)
         save_button.grid(row=2, column=0,padx=10,pady=(10,0))
     
+
+
+
     def show_word_select_manage(self,datajson,selectid,targetid):
         selected_indices = selectid.curselection()
         ##添加进备选框
@@ -318,14 +341,14 @@ class biliLiveBanword():
             boxid.insert(tk.END, option)
 
     #获取已选框中选择主题的屏蔽词（去重)
-    def _getWordList(self):
+    def _get_word_list(self):
         optionList = self.selectedbox2.get(0, tk.END)
         wordList=[]
         for title in optionList:
             wordList=list(set(wordList+self.wordjson[title]))
         return wordList
 
-    def _setBoxWordList(self,wordList):
+    def _set_box_word_list(self,wordList):
         self.word_box1.text=""
         counter = 0
         textStr = ""
@@ -353,7 +376,7 @@ class biliLiveBanword():
         #获取输入的房间号
         roomid = self.entry_roomid.get()
         #获取已选屏蔽词清单
-        word_list = self._getWordList()
+        word_list = self._get_word_list()
         for word in word_list:
             logger.info("添加屏蔽词【"+ word+ "】……") 
             self._logger_out("添加屏蔽词【"+ word+ "】……") 
@@ -368,7 +391,7 @@ class biliLiveBanword():
         #获取输入的房间号
         roomid = self.entry_roomid.get()
         #获取已选屏蔽词清单
-        word_list = self._getWordList()
+        word_list = self._get_word_list()
         for word in word_list:
             logger.info("移除屏蔽词【"+ word + "】……") 
             self._logger_out("移除屏蔽词【"+ word + "】……")
