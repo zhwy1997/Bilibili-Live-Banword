@@ -92,6 +92,22 @@ class biliLiveBanword():
         self.entry_roomid = tk.Entry(self.root, textvariable=self.entry_roomid_var)
         self.entry_roomid.grid(row=0, column=1, padx=10, pady=(570,5), sticky="nw")
       
+        #单个屏蔽词
+        self.add_one_button = tk.Button(self.root, text="添加单个",font=("黑体", 12), command=self._add_one_word_to_live)
+        self.add_one_button.grid(row=0, column=1, padx=180, pady=(620,5), sticky="nw")
+
+        self.remove_one_button = tk.Button(self.root, text="移除单个",font=("黑体", 12), command=self._remove_one_word_from_live)
+        self.remove_one_button.grid(row=0, column=1, padx=(300,0), pady=(620,5), sticky="nw")
+
+        self.roomid_one_label = tk.Label(self.root, text="单个屏蔽词", font=("黑体", 12))
+        self.roomid_one_label.grid(row=0, column=1, padx=10, pady=(600,5), sticky="nw")
+
+        self.entry_one_word_var = tk.StringVar()
+        self.entry_one_word = tk.Entry(self.root, textvariable=self.entry_one_word_var)
+        self.entry_one_word.grid(row=0, column=1, padx=10, pady=(620,5), sticky="nw")
+
+        ## 单个屏蔽词结束 ##
+
         self._drawOption(self.wordjson ,self.selectedbox1)
         
         ##日志窗口
@@ -402,6 +418,40 @@ class biliLiveBanword():
             else :
                 logger.info("移除屏蔽词【"+ word +"】失败，" + message)
                 self._logger_out("移除屏蔽词【"+ word +"】失败，" + message)
+
+    def _add_one_word_to_live(self):
+        #获取输入的房间号
+        roomid = self.entry_roomid.get()
+        #获取已选屏蔽词清单
+        word = self.entry_one_word.get()
+        
+        logger.info("添加屏蔽词【"+ word+ "】……") 
+        self._logger_out("添加屏蔽词【"+ word+ "】……") 
+        code,message = add_live_word_req  (roomid,word,self.user.login_session,self.csrf)
+        if code == 0:
+            logger.info("添加屏蔽词【"+ word +"】成功")
+            self._logger_out("添加屏蔽词【"+ word +"】成功")
+        else :
+            logger.info("添加屏蔽词【"+ word +"】失败，" + message)
+            self._logger_out("添加屏蔽词【"+ word +"】失败，" + message)
+    
+    #移除单个屏蔽词
+    def _remove_one_word_from_live(self):    
+        #获取输入的房间号
+        roomid = self.entry_roomid.get()
+        #获取已选屏蔽词清单
+        word = self.entry_one_word.get()
+        
+        logger.info("移除屏蔽词【"+ word + "】……") 
+        self._logger_out("移除屏蔽词【"+ word + "】……")
+        code,message = remove_live_word_req  (roomid,word,self.user.login_session,self.csrf)
+        if code == 0:
+            logger.info("移除屏蔽词【"+ word +"】成功")
+            self._logger_out("移除屏蔽词【"+ word +"】成功")
+        else :
+            logger.info("移除屏蔽词【"+ word +"】失败，" + message)
+            self._logger_out("移除屏蔽词【"+ word +"】失败，" + message)
+
 
     def _logger_out(self,message):
         self.log_box.config(state="normal")
