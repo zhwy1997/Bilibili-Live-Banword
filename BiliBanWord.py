@@ -7,7 +7,9 @@ from wordListFile import *
 from biliLiveTool import *
 import ttkbootstrap as ttk
 from PIL import Image,ImageTk
-
+import ctypes
+ctypes.windll.shcore.SetProcessDpiAwareness(1)
+ScaleFactor=ctypes.windll.shcore.GetScaleFactorForDevice(0)/100
 class biliLiveBanword():
     def __init__(self):
         self.user = bilibiliQRLogin()
@@ -17,30 +19,32 @@ class biliLiveBanword():
         self.csrf = ""
         self.root =ttk.Window(themename="litera")
         self.root.title("屏蔽词小程序")
-        self.root.geometry("1024x768")
+        self.root.geometry("{:.0f}".format(1024*ScaleFactor)+"x"+"{:.0f}".format(768*ScaleFactor))
 
+        #调整缩放比例
 
+        #self.root.tk.call('tk','scaling',ScaleFactor/75)
         #添加页签
 
         ##如果没有登录
         if (not loginFlag):
             # 创建登录按钮
             self.login_button = tk.Button(self.root, text="登录", font=("黑体", 12),width=20, height=3,  borderwidth=3, relief="raised",command=self._login_clicked)
-            self.login_button.grid(row=0, column=0, padx=10, pady=10, sticky="nw")
+            self.login_button.grid(row=0, column=0, padx=10*ScaleFactor, pady=10*ScaleFactor, sticky="nw")
             #login_button.pack(padx=10, pady=10)
             # 创建显示文字的 Label
             self.text_label = tk.Label(self.root, text="您尚未登录，请先登录！", font=("黑体", 12))
-            self.text_label.grid(row=0, column=0, padx=10, pady=(100,10), sticky="nw")
+            self.text_label.grid(row=0, column=0, padx=10*ScaleFactor, pady=(100*ScaleFactor,10*ScaleFactor), sticky="nw")
 
             self.text_label2 = tk.Label(self.root, text="点击登录刷新二维码", font=("黑体", 12))
-            self.text_label2.grid(row=0, column=0, padx=50, pady=(150,5), sticky="nw")
+            self.text_label2.grid(row=0, column=0, padx=50, pady=(150*ScaleFactor,5*ScaleFactor), sticky="nw")
         
             # 创建左侧的图片框-扫码
-            self.image_frame = tk.Frame(self.root, width=300, height=300, bg="lightgrey")
-            self.image_frame.grid(row=0, column=0, padx=10, pady=180, sticky="nw")  #180像素开始
+            self.image_frame = tk.Frame(self.root, width=300*ScaleFactor, height=300*ScaleFactor, bg="lightgrey")
+            self.image_frame.grid(row=0, column=0, padx=10*ScaleFactor, pady=180*ScaleFactor, sticky="nw")  #180像素开始
 
             self.qr_code_lable= tk.Label(self.image_frame)
-            self.qr_code_lable.pack(padx=10, pady=10)
+            self.qr_code_lable.pack(padx=10*ScaleFactor, pady=10*ScaleFactor)
         else :
             self.csrf = self.user.login_session.cookies._cookies[".bilibili.com"]["/"]["bili_jct"].value
             uname = getUserInfo(self.user.login_session)
@@ -48,63 +52,63 @@ class biliLiveBanword():
             self.text_label.grid(row=0, column=0, padx=10, pady=(100,10), sticky="nw")
         ##备选多选框
         self.text_label3 = tk.Label(self.root, text="备选主题", font=("黑体", 12))
-        self.text_label3.grid(row=0, column=1, padx=10, pady=10, sticky="nw")
+        self.text_label3.grid(row=0, column=1, padx=10*ScaleFactor, pady=10*ScaleFactor, sticky="nw")
         self.selectedbox1 = tk.Listbox(self.root, selectmode=tk.MULTIPLE, width=20, height=15)
-        self.selectedbox1.grid(row=0, column=1, padx=10, pady=(50,10), sticky="nw")
+        self.selectedbox1.grid(row=0, column=1, padx=10*ScaleFactor, pady=(50*ScaleFactor,10*ScaleFactor), sticky="nw")
 
 
         ##已选多选框
         self.text_label4 = tk.Label(self.root, text="已选主题", font=("黑体", 12))
-        self.text_label4.grid(row=0, column=1, padx=(270,0), pady=10, sticky="nw")
+        self.text_label4.grid(row=0, column=1, padx=(270*ScaleFactor,0), pady=10*ScaleFactor, sticky="nw")
         self.selectedbox2 = tk.Listbox(self.root, selectmode=tk.MULTIPLE, width=20, height=15)
-        self.selectedbox2.grid(row=0, column=1,padx=(270,0), pady=(50,10), sticky="nw")
+        self.selectedbox2.grid(row=0, column=1,padx=(270*ScaleFactor,0), pady=(50*ScaleFactor,10), sticky="nw")
 
 
         # 创建选择按钮
         self.select_button = tk.Button(self.root, text="选择→",font=("黑体", 12), command=self.select_clicked)
-        self.select_button.grid(row=0, column=1, padx=(180,0), pady=100, sticky="nw")
+        self.select_button.grid(row=0, column=1, padx=(180*ScaleFactor,0), pady=100*ScaleFactor, sticky="nw")
 
         # 创建取消选择按钮
         self.cancel_button = tk.Button(self.root, text="←取消选择",font=("黑体", 12), command=self.cancel_clicked)
-        self.cancel_button.grid(row=0, column=1, padx=(160,0), pady=150, sticky="nw")
+        self.cancel_button.grid(row=0, column=1, padx=(160*ScaleFactor,0), pady=150*ScaleFactor, sticky="nw")
 
         self.manage_button = tk.Button(self.root, text="本地屏蔽词清单管理", font=("黑体", 12),command=self.manage_clicked)
-        self.manage_button.grid(row=0, column=0, padx=(10,0), pady=400, sticky="nw")
+        self.manage_button.grid(row=0, column=0, padx=(10*ScaleFactor,0), pady=400*ScaleFactor, sticky="nw")
 
         # 创建已选屏蔽词清单
         self.word_label = tk.Label(self.root, text="已选屏蔽词列表", font=("黑体", 12))
-        self.word_label.grid(row=0, column=1, padx=10, pady=(340,5), sticky="nw")
+        self.word_label.grid(row=0, column=1, padx=10*ScaleFactor, pady=(340*ScaleFactor,5*ScaleFactor), sticky="nw")
 
         self.word_box1 = tk.Text(self.root, width=58, height=10,state="disabled")
-        self.word_box1.grid(row=0, column=1, padx=10, pady=360, sticky="nw")
+        self.word_box1.grid(row=0, column=1, padx=10*ScaleFactor, pady=360*ScaleFactor, sticky="nw")
 
 
         self.add_button = tk.Button(self.root, text="添加到直播间",font=("黑体", 12), command=self.add_word_to_live)
-        self.add_button.grid(row=0, column=1, padx=180, pady=(570,5), sticky="nw")
+        self.add_button.grid(row=0, column=1, padx=180*ScaleFactor, pady=(570*ScaleFactor,5*ScaleFactor), sticky="nw")
 
         self.remove_button = tk.Button(self.root, text="从直播间移除",font=("黑体", 12), command=self.remove_word_from_live)
-        self.remove_button.grid(row=0, column=1, padx=(300,0), pady=(570,5), sticky="nw")
+        self.remove_button.grid(row=0, column=1, padx=(300*ScaleFactor,0), pady=(570*ScaleFactor,5*ScaleFactor), sticky="nw")
 
         self.roomid_label = tk.Label(self.root, text="房间号", font=("黑体", 12))
-        self.roomid_label.grid(row=0, column=1, padx=10, pady=(550,5), sticky="nw")
+        self.roomid_label.grid(row=0, column=1, padx=10*ScaleFactor, pady=(550*ScaleFactor,5*ScaleFactor), sticky="nw")
 
         self.entry_roomid_var = tk.StringVar()
         self.entry_roomid = tk.Entry(self.root, textvariable=self.entry_roomid_var)
-        self.entry_roomid.grid(row=0, column=1, padx=10, pady=(570,5), sticky="nw")
+        self.entry_roomid.grid(row=0, column=1, padx=10*ScaleFactor, pady=(570*ScaleFactor,5*ScaleFactor), sticky="nw")
       
         #单个屏蔽词
         self.add_one_button = tk.Button(self.root, text="添加单个",font=("黑体", 12), command=self._add_one_word_to_live)
-        self.add_one_button.grid(row=0, column=1, padx=180, pady=(620,5), sticky="nw")
+        self.add_one_button.grid(row=0, column=1, padx=180*ScaleFactor, pady=(620*ScaleFactor,5*ScaleFactor), sticky="nw")
 
         self.remove_one_button = tk.Button(self.root, text="移除单个",font=("黑体", 12), command=self._remove_one_word_from_live)
-        self.remove_one_button.grid(row=0, column=1, padx=(300,0), pady=(620,5), sticky="nw")
+        self.remove_one_button.grid(row=0, column=1, padx=(300*ScaleFactor,0), pady=(620*ScaleFactor,5), sticky="nw")
 
         self.roomid_one_label = tk.Label(self.root, text="单个屏蔽词", font=("黑体", 12))
-        self.roomid_one_label.grid(row=0, column=1, padx=10, pady=(600,5), sticky="nw")
+        self.roomid_one_label.grid(row=0, column=1, padx=10*ScaleFactor, pady=(600*ScaleFactor,5*ScaleFactor), sticky="nw")
 
         self.entry_one_word_var = tk.StringVar()
         self.entry_one_word = tk.Entry(self.root, textvariable=self.entry_one_word_var)
-        self.entry_one_word.grid(row=0, column=1, padx=10, pady=(620,5), sticky="nw")
+        self.entry_one_word.grid(row=0, column=1, padx=10*ScaleFactor, pady=(620*ScaleFactor,5*ScaleFactor), sticky="nw")
 
         ## 单个屏蔽词结束 ##
 
@@ -114,13 +118,13 @@ class biliLiveBanword():
         
 
         self.log_label = tk.Label(self.root, text="日志窗口", font=("黑体", 12))
-        self.log_label.grid(row=0, column=2, padx=1, pady=10, sticky="nw")
+        self.log_label.grid(row=0, column=2, padx=1*ScaleFactor, pady=10*ScaleFactor, sticky="nw")
         
         self.log_frame = tk.Frame(self.root)
-        self.log_frame.grid(row=0, column=2,padx=1, pady=(50,10), sticky="nw")  # 设置容器填充满父容器
+        self.log_frame.grid(row=0, column=2,padx=1*ScaleFactor, pady=(50*ScaleFactor,10*ScaleFactor), sticky="nw")  # 设置容器填充满父容器
 
         self.log_box = tk.Text(self.log_frame, height=30, width=40)
-        self.log_box.grid(row=0, column=2,padx=1, pady=0, sticky="nw")
+        self.log_box.grid(row=0, column=2,padx=1*ScaleFactor, pady=0, sticky="nw")
         self.log_box.config(state="disabled")  # 设置文本框状态为不可编辑   
         #self.word_box1.config(state="normal")  # 设置文本框状态为可编辑
         #self.word_box1.delete(1.0, tk.END)     # 清空文本框内容
@@ -205,45 +209,48 @@ class biliLiveBanword():
     def manage_clicked(self):
         child_window = tk.Toplevel(self.root)
         child_window.title("本地屏蔽词管理")
-        child_window.geometry("400x500")
+        #child_window.geometry("400x500")
+        
+        child_window.geometry("{:.0f}".format(400*ScaleFactor)+"x"+"{:.0f}".format(500*ScaleFactor))
+
         child_window.grab_set()  # 将子窗口设置为模态
 
 
         ##主题单选框
         topic_label = tk.Label(child_window, text="主题清单", font=("黑体", 12))
-        topic_label.grid(row=1, column=0,sticky="nw",padx=10, pady=0)
+        topic_label.grid(row=1, column=0,sticky="nw",padx=10*ScaleFactor, pady=0)
         topic_select = tk.Listbox(child_window, selectmode=tk.SINGLE, width=20, height=15,exportselection=False)
-        topic_select.grid(row=1, column=0,sticky="nw",padx=10, pady=25)
+        topic_select.grid(row=1, column=0,sticky="nw",padx=10*ScaleFactor, pady=25*ScaleFactor)
         entry_var = tk.StringVar()
         del_topic_button = tk.Button(child_window, text="删除该主题",font=("黑体", 12),width=20, height=1,borderwidth=3,command=lambda: self.del_topic(topic_select,word_select))
-        del_topic_button.grid(row=1, column=0,padx=10,pady=(250,0))
+        del_topic_button.grid(row=1, column=0,padx=10*ScaleFactor,pady=(250*ScaleFactor,0))
         entry_topic = tk.Entry(child_window, textvariable=entry_var)
-        entry_topic.grid(row=1, column=0,sticky="nw",padx=10, pady=(345,0))
+        entry_topic.grid(row=1, column=0,sticky="nw",padx=10*ScaleFactor, pady=(345*ScaleFactor,0))
         add_topic_button = tk.Button(child_window, text="添加",font=("黑体", 12),width=10, height=1,borderwidth=2, fg="pink",command=lambda: self.add_topic(entry_topic,topic_select))
-        add_topic_button.grid(row=1, column=0,padx=10,pady=(370,0))
+        add_topic_button.grid(row=1, column=0,padx=10*ScaleFactor,pady=(370*ScaleFactor,0))
 
         self._drawOption(self.wordjson,topic_select)
         entry_topic.bind("<Return>", lambda event: self.add_topic(entry_topic,topic_select))
         ##该主题的屏蔽词清单
         word_label = tk.Label(child_window, text="屏蔽词列表", font=("黑体", 12))
-        word_label.grid(row=1, column=1,sticky='nw',padx=10, pady=0)
+        word_label.grid(row=1, column=1,sticky='nw',padx=10*ScaleFactor, pady=0)
         #word_select= tk.Listbox(child_window, selectmode=tk.MULTIPLE, width=20, height=15)
         #word_select.grid(row=1, column=1,sticky="nw",padx=10, pady=20)
         del_word_button = tk.Button(child_window, text="删除该屏蔽词",font=("黑体", 12),width=20, height=1,borderwidth=3, command=lambda: self.del_word(topic_select,word_select) )
-        del_word_button.grid(row=1, column=1,padx=10,pady=(250,0))
+        del_word_button.grid(row=1, column=1,padx=10*ScaleFactor,pady=(250*ScaleFactor,0))
         entry_var_word = tk.StringVar()
         entry_word = tk.Entry(child_window, textvariable=entry_var_word)
-        entry_word.grid(row=1, column=1,sticky="nw",padx=10, pady=(345,0))
+        entry_word.grid(row=1, column=1,sticky="nw",padx=10*ScaleFactor, pady=(345*ScaleFactor,0))
         add_word_button = tk.Button(child_window, text="添加",font=("黑体", 12),width=10, height=1,borderwidth=2, command=lambda: self.add_word(entry_word,topic_select,word_select))
-        add_word_button.grid(row=1, column=1,padx=10,pady=(370,0))
+        add_word_button.grid(row=1, column=1,padx=10*ScaleFactor,pady=(370*ScaleFactor,0))
 
         ##贴着清单的滚动条
 
         sub_frame = tk.Frame(child_window)
-        sub_frame.grid(row=1, column=1,padx=(0,0), pady=(20,10),sticky="nw")  # 设置容器填充满父容器
+        sub_frame.grid(row=1, column=1,padx=(0,0), pady=(20*ScaleFactor,10*ScaleFactor),sticky="nw")  # 设置容器填充满父容器
 
         word_select= tk.Listbox(sub_frame, selectmode=tk.MULTIPLE, width=20, height=15)
-        word_select.grid(row=1, column=1,sticky="nw", pady=5)
+        word_select.grid(row=1, column=1,sticky="nw", pady=5*ScaleFactor)
         scrollbar1 = Scrollbar(sub_frame, command=word_select.yview)
         scrollbar1.grid(row=1, column=2, sticky="ns")
         # # 将滚动条与Text控件关联
@@ -260,7 +267,7 @@ class biliLiveBanword():
     
         ##保存按钮
         save_button = tk.Button(child_window, text="保存当前列表到本地",font=("黑体", 12),width=20, height=1,borderwidth=2, fg="pink",command=self.save_word)
-        save_button.grid(row=2, column=0,padx=10,pady=(10,0))
+        save_button.grid(row=2, column=0,padx=10*ScaleFactor,pady=(10*ScaleFactor,0))
     
 
 
